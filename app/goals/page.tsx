@@ -23,34 +23,33 @@ export default function GoalsPage() {
 
   const handleDeposit = (id: string) => {
     const amt = parseFloat(depositAmount);
-    if (!isNaN(amt) && amt > 0) { updateGoalSaved(id, amt); }
+    if (!isNaN(amt) && amt > 0) updateGoalSaved(id, amt);
     setDepositId(null);
     setDepositAmount("");
   };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>Savings Goals</h1>
-          <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>{goals.length} active goals</p>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "var(--foreground)" }}>Savings Goals</h1>
+          <p className="text-xs md:text-sm mt-1" style={{ color: "var(--muted)" }}>{goals.length} active goals</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
           onClick={() => setShowForm(true)}
-          className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+          className="bg-indigo-600 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
         >
-          <Plus size={16} /> New Goal
+          <Plus size={15} /> New
         </motion.button>
       </div>
 
-      {/* Add form */}
       <AnimatePresence>
         {showForm && (
           <motion.form
             initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
             onSubmit={handleAdd}
-            className="rounded-2xl p-6 mb-6 grid grid-cols-3 gap-4"
+            className="rounded-2xl p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
             {[
@@ -65,21 +64,21 @@ export default function GoalsPage() {
                 <input required={key === "title" || key === "target"} type={type} placeholder={placeholder}
                   value={form[key as keyof typeof form]}
                   onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
                   style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
               </div>
             ))}
             <div className="flex items-end gap-2">
               <button type="submit" className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Create</button>
-              <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-2.5 rounded-xl text-sm font-medium"
+              <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-2.5 rounded-xl text-sm"
                 style={{ background: "var(--background)", color: "var(--muted)", border: "1px solid var(--border)" }}>Cancel</button>
             </div>
           </motion.form>
         )}
       </AnimatePresence>
 
-      {/* Goal cards */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* 1 col mobile, 2 col sm, 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map((goal, i) => {
           const pct = Math.min((goal.saved / goal.target) * 100, 100);
           const remaining = goal.target - goal.saved;
@@ -90,22 +89,19 @@ export default function GoalsPage() {
             <motion.div
               key={goal.id}
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-              className="rounded-2xl p-6 group relative"
+              className="rounded-2xl p-5 relative"
               style={{ background: "var(--card)", border: `1px solid ${done ? "#22c55e40" : "var(--border)"}` }}
             >
-              <button onClick={() => deleteGoal(goal.id)}
-                className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ color: "var(--muted)" }}>
+              <button onClick={() => deleteGoal(goal.id)} className="absolute top-4 right-4" style={{ color: "var(--muted)" }}>
                 <Trash2 size={14} />
               </button>
 
               <div className="text-3xl mb-3">{goal.emoji}</div>
-              <h3 className="font-semibold mb-1" style={{ color: "var(--foreground)" }}>{goal.title}</h3>
+              <h3 className="font-semibold mb-1 pr-6" style={{ color: "var(--foreground)" }}>{goal.title}</h3>
               <p className="text-xs mb-4" style={{ color: "var(--muted)" }}>
                 {formatCurrency(goal.saved, currency)} of {formatCurrency(goal.target, currency)}
               </p>
 
-              {/* Progress */}
               <div className="h-2.5 rounded-full overflow-hidden mb-2" style={{ background: "var(--border)" }}>
                 <motion.div
                   initial={{ width: 0 }} animate={{ width: `${pct}%` }}
@@ -115,19 +111,18 @@ export default function GoalsPage() {
                 />
               </div>
 
-              <div className="flex justify-between text-xs mb-4" style={{ color: "var(--muted)" }}>
+              <div className="flex justify-between text-xs mb-3" style={{ color: "var(--muted)" }}>
                 <span>{done ? "🎉 Goal reached!" : `${formatCurrency(remaining, currency)} to go`}</span>
                 <span className="font-medium" style={{ color: done ? "#22c55e" : "#6366f1" }}>{pct.toFixed(0)}%</span>
               </div>
 
               {daysLeft !== null && (
-                <p className="text-xs mb-4" style={{ color: daysLeft < 30 ? "#ef4444" : "var(--muted)" }}>
+                <p className="text-xs mb-3" style={{ color: daysLeft < 30 ? "#ef4444" : "var(--muted)" }}>
                   {daysLeft > 0 ? `⏳ ${daysLeft} days left` : "⚠️ Deadline passed"}
                   {goal.deadline && ` · ${format(parseISO(goal.deadline), "MMM d, yyyy")}`}
                 </p>
               )}
 
-              {/* Deposit */}
               {!done && (
                 depositId === goal.id ? (
                   <div className="flex gap-2">
@@ -157,7 +152,7 @@ export default function GoalsPage() {
       {goals.length === 0 && (
         <div className="text-center py-24" style={{ color: "var(--muted)" }}>
           <p className="text-4xl mb-3">🎯</p>
-          <p className="text-sm">No savings goals yet. Create one to start tracking your progress.</p>
+          <p className="text-sm">No savings goals yet.</p>
         </div>
       )}
     </div>

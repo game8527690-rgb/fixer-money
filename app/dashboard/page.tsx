@@ -21,38 +21,36 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>Dashboard</h1>
-          <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>Your financial overview this month</p>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "var(--foreground)" }}>Dashboard</h1>
+          <p className="text-xs md:text-sm mt-1" style={{ color: "var(--muted)" }}>Your financial overview this month</p>
         </div>
         <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
+          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
           onClick={() => setShowModal(true)}
-          className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+          className="bg-indigo-600 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm font-medium"
         >
-          + Add Transaction
+          + Add
         </motion.button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <StatCard title="Total Balance" value={formatCurrency(net, currency)} icon={Wallet} color="#6366f1" sub="Net this month" />
+      {/* Stats — 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+        <StatCard title="Balance" value={formatCurrency(net, currency)} icon={Wallet} color="#6366f1" sub="Net this month" />
         <StatCard title="Income" value={formatCurrency(income, currency)} icon={TrendingUp} color="#22c55e" sub="This month" />
         <StatCard title="Expenses" value={formatCurrency(expenses, currency)} icon={TrendingDown} color="#ef4444" sub="This month" />
         <StatCard title="Transactions" value={String(monthly.length)} icon={ArrowUpDown} color="#f59e0b" sub="This month" />
       </div>
 
-      {/* Charts + Recent */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Donut chart */}
-        <div className="rounded-2xl p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Spending by Category</h3>
+      {/* Charts + Recent — stacked on mobile, side by side on desktop */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="rounded-2xl p-4 md:p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+          <h3 className="font-semibold mb-4 text-sm md:text-base" style={{ color: "var(--foreground)" }}>Spending by Category</h3>
           {breakdown.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie data={breakdown} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value">
+                <Pie data={breakdown} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value">
                   {breakdown.map((entry) => (
                     <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name as keyof typeof CATEGORY_COLORS] ?? "#94a3b8"} />
                   ))}

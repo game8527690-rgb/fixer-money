@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useFinanceStore, CATEGORIES, CATEGORY_ICONS, TransactionType } from "@/store/useFinanceStore";
 import { formatCurrency } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
-import { Trash2, Search, Filter } from "lucide-react";
+import { Trash2, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AddTransactionModal from "@/components/transactions/AddTransactionModal";
 
@@ -23,66 +23,93 @@ export default function TransactionsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>Transactions</h1>
-          <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>{filtered.length} transactions</p>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "var(--foreground)" }}>Transactions</h1>
+          <p className="text-xs md:text-sm mt-1" style={{ color: "var(--muted)" }}>{filtered.length} transactions</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
           onClick={() => setShowModal(true)}
-          className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium"
+          className="bg-indigo-600 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm font-medium"
         >
-          + Add Transaction
+          + Add
         </motion.button>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-6 flex-wrap">
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl flex-1 min-w-48"
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl flex-1"
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <Search size={16} style={{ color: "var(--muted)" }} />
+          <Search size={15} style={{ color: "var(--muted)" }} />
           <input
-            placeholder="Search transactions..."
+            placeholder="Search..."
             value={search} onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent outline-none text-sm flex-1"
             style={{ color: "var(--foreground)" }}
           />
         </div>
-
         <select value={filterType} onChange={(e) => setFilterType(e.target.value as TransactionType | "all")}
-          className="px-4 py-2.5 rounded-xl text-sm outline-none"
+          className="px-3 py-2.5 rounded-xl text-sm outline-none"
           style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--foreground)" }}>
           <option value="all">All Types</option>
           <option value="income">Income</option>
           <option value="expense">Expense</option>
           <option value="transfer">Transfer</option>
         </select>
-
         <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
-          className="px-4 py-2.5 rounded-xl text-sm outline-none"
+          className="px-3 py-2.5 rounded-xl text-sm outline-none"
           style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--foreground)" }}>
           <option value="all">All Categories</option>
           {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_ICONS[c]} {c}</option>)}
         </select>
       </div>
 
-      {/* Table */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-        <div className="grid grid-cols-5 px-6 py-3 text-xs font-semibold uppercase tracking-wide"
-          style={{ color: "var(--muted)", borderBottom: "1px solid var(--border)" }}>
-          <span>Transaction</span>
-          <span>Category</span>
-          <span>Date</span>
-          <span>Type</span>
-          <span className="text-right">Amount</span>
-        </div>
-
+      {/* Cards on mobile, table on desktop */}
+      <div className="md:hidden flex flex-col gap-3">
         <AnimatePresence>
           {filtered.map((t, i) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+              transition={{ delay: i * 0.02 }}
+              className="rounded-xl p-4 flex items-center justify-between"
+              style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{CATEGORY_ICONS[t.category]}</span>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: "var(--foreground)" }}>{t.title}</p>
+                  <p className="text-xs" style={{ color: "var(--muted)" }}>
+                    {format(parseISO(t.date), "MMM d")} · {t.category}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold"
+                  style={{ color: t.type === "income" ? "var(--income)" : "var(--expense)" }}>
+                  {t.type === "income" ? "+" : "-"}{formatCurrency(t.amount, currency)}
+                </span>
+                <button onClick={() => deleteTransaction(t.id)} style={{ color: "var(--muted)" }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-2xl overflow-hidden" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+        <div className="grid grid-cols-5 px-6 py-3 text-xs font-semibold uppercase tracking-wide"
+          style={{ color: "var(--muted)", borderBottom: "1px solid var(--border)" }}>
+          <span>Transaction</span><span>Category</span><span>Date</span><span>Type</span><span className="text-right">Amount</span>
+        </div>
+        <AnimatePresence>
+          {filtered.map((t, i) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ delay: i * 0.02 }}
               className="grid grid-cols-5 px-6 py-4 items-center group"
               style={{ borderBottom: "1px solid var(--border)" }}
@@ -114,7 +141,6 @@ export default function TransactionsPage() {
             </motion.div>
           ))}
         </AnimatePresence>
-
         {filtered.length === 0 && (
           <p className="text-center py-16 text-sm" style={{ color: "var(--muted)" }}>No transactions found</p>
         )}
