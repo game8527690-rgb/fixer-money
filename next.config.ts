@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "export",   // Static HTML export for Firebase Hosting
+  trailingSlash: true,
+  images: { unoptimized: true },
 };
 
 export default nextConfig;
