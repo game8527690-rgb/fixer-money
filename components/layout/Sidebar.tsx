@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Moon, Sun, Wallet, BarChart2, Menu, X, LogOut, HandCoins } from "lucide-react";
-import { useFinanceStore } from "@/store/useFinanceStore";
+import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Moon, Sun, Wallet, BarChart2, Menu, X, LogOut, HandCoins, ChevronDown } from "lucide-react";
+import { useFinanceStore, CURRENCIES, CURRENCY_SYMBOLS } from "@/store/useFinanceStore";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -19,7 +19,7 @@ const NAV = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { darkMode, toggleDarkMode } = useFinanceStore();
+  const { darkMode, toggleDarkMode, currency, setCurrency } = useFinanceStore();
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -54,6 +54,21 @@ export default function Sidebar() {
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           {darkMode ? "Light Mode" : "Dark Mode"}
         </button>
+
+        {/* Currency selector */}
+        <div className="px-4 py-2">
+          <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Currency</label>
+          <div className="relative">
+            <select value={currency} onChange={(e) => setCurrency(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-sm outline-none appearance-none pr-8"
+              style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }}>
+              {CURRENCIES.map((c) => (
+                <option key={c} value={c}>{CURRENCY_SYMBOLS[c]} {c}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--muted)" }} />
+          </div>
+        </div>
 
         {/* User info + logout */}
         {user && (
