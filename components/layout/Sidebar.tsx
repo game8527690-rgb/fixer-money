@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Moon, Sun, Wallet, BarChart2, Menu, X, LogOut } from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Moon, Sun, Wallet, BarChart2, Menu, X, LogOut, HandCoins } from "lucide-react";
 import { useFinanceStore } from "@/store/useFinanceStore";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +14,7 @@ const NAV = [
   { href: "/budgets", label: "Budgets", icon: PieChart },
   { href: "/analytics", label: "Analytics", icon: BarChart2 },
   { href: "/goals", label: "Goals", icon: Target },
+  { href: "/debts", label: "Debts", icon: HandCoins },
 ];
 
 export default function Sidebar() {

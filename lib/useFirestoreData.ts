@@ -4,7 +4,7 @@ import {
   collection, doc, onSnapshot, setDoc, deleteDoc, query, orderBy,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useFinanceStore, Transaction, Budget, SavingsGoal } from "@/store/useFinanceStore";
+import { useFinanceStore, Transaction, Budget, SavingsGoal, Debt, DebtPayment } from "@/store/useFinanceStore";
 
 export function useFirestoreSync(uid: string) {
   const store = useFinanceStore();
@@ -33,7 +33,14 @@ export function useFirestoreSync(uid: string) {
       useFinanceStore.setState({ goals });
     });
 
-    return () => { unsubTx(); unsubBud(); unsubGoal(); };
+    // Debts
+    const debtRef = collection(db, "users", uid, "debts");
+    const unsubDebt = onSnapshot(query(debtRef, orderBy("date", "desc")), (snap) => {
+      const debts: Debt[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Debt));
+      useFinanceStore.setState({ debts });
+    });
+
+    return () => { unsubTx(); unsubBud(); unsubGoal(); unsubDebt(); };
   }, [uid]);
 
   // Write helpers — override store actions to also write to Firestore
@@ -73,6 +80,28 @@ export function useFirestoreSync(uid: string) {
       },
       deleteGoal: async (id) => {
         await deleteDoc(doc(db, "users", uid, "goals", id));
+      },
+      addDebt: async (d) => {
+        const id = crypto.randomUUID();
+        const debt: Debt = { ...d, id, amountPaid: 0, status: "pending", payments: [] };
+        await setDoc(doc(db, "users", uid, "debts", id), debt);
+      },
+      recordDebtPayment: async (debtId, payment) => {
+        const existing = useFinanceStore.getState().debts.find((d) => d.id === debtId);
+        if (!existing) return;
+        const newPayment: DebtPayment = { ...payment, id: crypto.randomUUID() };
+        const amountPaid = existing.amountPaid + payment.amount;
+        const status = amountPaid >= existing.amount ? "settled" : "partial";
+        const updated: Debt = { ...existing, amountPaid, status, payments: [...existing.payments, newPayment] };
+        await setDoc(doc(db, "users", uid, "debts", debtId), updated);
+      },
+      settleDebt: async (debtId) => {
+        const existing = useFinanceStore.getState().debts.find((d) => d.id === debtId);
+        if (!existing) return;
+        await setDoc(doc(db, "users", uid, "debts", debtId), { ...existing, amountPaid: existing.amount, status: "settled" });
+      },
+      deleteDebt: async (id) => {
+        await deleteDoc(doc(db, "users", uid, "debts", id));
       },
     });
   }, [uid]);
