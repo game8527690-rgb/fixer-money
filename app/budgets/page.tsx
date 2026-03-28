@@ -13,8 +13,7 @@ export default function BudgetsPage() {
   const currentMonth = format(new Date(), "yyyy-MM");
   const monthBudgets = budgets.filter((b) => b.month === currentMonth);
 
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAdd = () => {
     if (!form.limit) return;
     addBudget({ category: form.category, limit: parseFloat(form.limit), month: currentMonth });
     setForm({ category: "Food", limit: "" });
@@ -39,9 +38,8 @@ export default function BudgetsPage() {
 
       <AnimatePresence>
         {showForm && (
-          <motion.form
+          <motion.div
             initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-            onSubmit={handleAdd}
             className="rounded-2xl p-4 mb-4 flex flex-col sm:flex-row gap-3 items-end"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}
           >
@@ -55,17 +53,17 @@ export default function BudgetsPage() {
             </div>
             <div className="flex-1 w-full">
               <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Monthly Limit</label>
-              <input required type="number" min="1" placeholder="0.00"
+              <input type="number" min="1" placeholder="0.00"
                 value={form.limit} onChange={(e) => setForm((f) => ({ ...f, limit: e.target.value }))}
                 className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
                 style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <button type="submit" className="flex-1 sm:flex-none px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Add</button>
+              <button type="button" onClick={handleAdd} className="flex-1 sm:flex-none px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Add</button>
               <button type="button" onClick={() => setShowForm(false)} className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-sm"
                 style={{ background: "var(--background)", color: "var(--muted)", border: "1px solid var(--border)" }}>Cancel</button>
             </div>
-          </motion.form>
+          </motion.div>
         )}
       </AnimatePresence>
 

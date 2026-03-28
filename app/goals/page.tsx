@@ -14,8 +14,7 @@ export default function GoalsPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState({ title: "", target: "", saved: "", deadline: "", emoji: "🎯", currency });
 
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAdd = () => {
     if (!form.title.trim()) { setError("Title is required"); return; }
     if (!form.target || isNaN(parseFloat(form.target))) { setError("Target amount is required"); return; }
     setError("");
@@ -29,7 +28,6 @@ export default function GoalsPage() {
     setForm({ title: "", target: "", saved: "", deadline: "", emoji: "🎯", currency });
     setShowForm(false);
   };
-
   const handleDeposit = (id: string) => {
     const amt = parseFloat(depositAmount);
     if (!isNaN(amt) && amt > 0) updateGoalSaved(id, amt);
@@ -56,32 +54,33 @@ export default function GoalsPage() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
             className="rounded-2xl p-4 mb-4 overflow-hidden"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            <form onSubmit={handleAdd}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {[
-                  { label: "Emoji", key: "emoji", type: "text", placeholder: "🎯" },
-                  { label: "Goal Title *", key: "title", type: "text", placeholder: "e.g. Flight to Japan" },
-                  { label: "Target Amount *", key: "target", type: "number", placeholder: "0.00" },
-                  { label: "Already Saved", key: "saved", type: "number", placeholder: "0.00" },
-                  { label: "Deadline (optional)", key: "deadline", type: "date", placeholder: "" },
-                ].map(({ label, key, type, placeholder }) => (
-                  <div key={key}>
-                    <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>{label}</label>
-                    <input type={type} placeholder={placeholder}
-                      value={form[key as keyof typeof form]}
-                      onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
-                      style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
-                  </div>
-                ))}
-              </div>
-              {error && <p className="text-xs mt-2" style={{ color: "#ef4444" }}>{error}</p>}
-              <div className="flex gap-2 mt-4">
-                <button type="submit" className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Create</button>
-                <button type="button" onClick={() => { setShowForm(false); setError(""); }} className="flex-1 py-2.5 rounded-xl text-sm"
-                  style={{ background: "var(--background)", color: "var(--muted)", border: "1px solid var(--border)" }}>Cancel</button>
-              </div>
-            </form>
+          <div className="rounded-2xl p-4 mb-4 overflow-hidden"
+            style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {[
+                { label: "Emoji", key: "emoji", type: "text", placeholder: "🎯" },
+                { label: "Goal Title *", key: "title", type: "text", placeholder: "e.g. Flight to Japan" },
+                { label: "Target Amount *", key: "target", type: "number", placeholder: "0.00" },
+                { label: "Already Saved", key: "saved", type: "number", placeholder: "0.00" },
+                { label: "Deadline (optional)", key: "deadline", type: "date", placeholder: "" },
+              ].map(({ label, key, type, placeholder }) => (
+                <div key={key}>
+                  <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>{label}</label>
+                  <input type={type} placeholder={placeholder}
+                    value={form[key as keyof typeof form]}
+                    onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                    style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
+                </div>
+              ))}
+            </div>
+            {error && <p className="text-xs mt-2" style={{ color: "#ef4444" }}>{error}</p>}
+            <div className="flex gap-2 mt-4">
+              <button type="button" onClick={handleAdd} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Create</button>
+              <button type="button" onClick={() => { setShowForm(false); setError(""); }} className="flex-1 py-2.5 rounded-xl text-sm"
+                style={{ background: "var(--background)", color: "var(--muted)", border: "1px solid var(--border)" }}>Cancel</button>
+            </div>
+          </div>
           </motion.div>
         )}
       </AnimatePresence>

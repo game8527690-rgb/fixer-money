@@ -15,8 +15,7 @@ export default function AddTransactionModal({ onClose }: Props) {
     note: "", recurring: false,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (!form.title || !form.amount) return;
     addTransaction({
       ...form,
@@ -46,7 +45,7 @@ export default function AddTransactionModal({ onClose }: Props) {
             <button onClick={onClose} style={{ color: "var(--muted)" }}><X size={20} /></button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
             {/* Type toggle */}
             <div className="flex rounded-xl overflow-hidden border" style={{ borderColor: "var(--border)" }}>
               {(["expense", "income", "transfer"] as TransactionType[]).map((t) => (
@@ -61,14 +60,14 @@ export default function AddTransactionModal({ onClose }: Props) {
             </div>
 
             <input
-              required placeholder="Title"
+              placeholder="Title"
               value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none"
               style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }}
             />
 
             <input
-              required type="number" min="0" step="0.01" placeholder="Amount"
+              type="number" min="0" step="0.01" placeholder="Amount"
               value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
               className="w-full px-4 py-3 rounded-xl text-sm outline-none"
               style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }}
@@ -104,12 +103,13 @@ export default function AddTransactionModal({ onClose }: Props) {
 
             <motion.button
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               className="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium text-sm hover:bg-indigo-700 transition-colors"
             >
               Add Transaction
             </motion.button>
-          </form>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>

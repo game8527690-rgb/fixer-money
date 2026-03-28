@@ -37,8 +37,7 @@ export default function DebtsPage() {
     note: "",
   });
 
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAdd = () => {
     if (!form.personName.trim()) { setFormError("Person's name is required"); return; }
     if (!form.reason.trim()) { setFormError("Reason is required"); return; }
     if (!form.amount || isNaN(parseFloat(form.amount))) { setFormError("Amount is required"); return; }
@@ -48,7 +47,7 @@ export default function DebtsPage() {
       personName: form.personName.trim(),
       amount: parseFloat(form.amount),
       currency: form.currency,
-      date: new Date(form.date).toISOString(),
+      date: form.date ? new Date(form.date).toISOString() : new Date().toISOString(),
       dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : undefined,
       reason: form.reason.trim(),
       note: form.note.trim() || undefined,
@@ -124,7 +123,7 @@ export default function DebtsPage() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
             className="rounded-2xl p-5 mb-5 overflow-hidden"
             style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            <form onSubmit={handleAdd}>
+            <div>
               <h3 className="font-semibold mb-4 text-sm" style={{ color: "var(--foreground)" }}>New Debt Entry</h3>
               <div className="flex rounded-xl overflow-hidden border mb-4" style={{ borderColor: "var(--border)" }}>
                 {([["owed_to_me", "💰 Owed to Me"], ["i_owe", "💸 I Owe"]] as [DebtDirection, string][]).map(([val, label]) => (
@@ -168,11 +167,11 @@ export default function DebtsPage() {
               {formError && <p className="text-xs mt-2" style={{ color: "#ef4444" }}>{formError}</p>}
 
               <div className="flex gap-2 mt-4">
-                <button type="submit" className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Add Debt</button>
+                <button type="button" onClick={handleAdd} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Add Debt</button>
                 <button type="button" onClick={() => { setShowForm(false); setFormError(""); }} className="flex-1 py-2.5 rounded-xl text-sm"
                   style={{ background: "var(--background)", color: "var(--muted)", border: "1px solid var(--border)" }}>Cancel</button>
               </div>
-            </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
