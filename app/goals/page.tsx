@@ -1,33 +1,41 @@
 "use client";
 import { useState } from "react";
-import { useFinanceStore, CURRENCIES, CURRENCY_SYMBOLS } from "@/store/useFinanceStore";
+import { useFinanceStore } from "@/store/useFinanceStore";
 import { formatCurrency } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2 } from "lucide-react";
 import { format, parseISO, differenceInDays } from "date-fns";
 
 export default function GoalsPage() {
-  const { goals, addGoal, updateGoalSaved, deleteGoal, currency, setCurrency } = useFinanceStore();
+  const { goals, addGoal, updateGoalSaved, deleteGoal, currency } = useFinanceStore();
   const [showForm, setShowForm] = useState(false);
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositAmount, setDepositAmount] = useState("");
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ title: "", target: "", saved: "", deadline: "", emoji: "🎯", currency });
+  const [title, setTitle] = useState("");
+  const [target, setTarget] = useState("");
+  const [saved, setSaved] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [emoji, setEmoji] = useState("🎯");
+
+  const resetForm = () => {
+    setTitle(""); setTarget(""); setSaved(""); setDeadline(""); setEmoji("🎯"); setError("");
+  };
 
   const handleAdd = () => {
-    if (!form.title.trim()) { setError("Title is required"); return; }
-    if (!form.target || isNaN(parseFloat(form.target))) { setError("Target amount is required"); return; }
-    setError("");
+    if (!title.trim()) { setError("Title is required"); return; }
+    if (!target || isNaN(parseFloat(target)) || parseFloat(target) <= 0) { setError("Valid target amount is required"); return; }
     addGoal({
-      title: form.title.trim(),
-      target: parseFloat(form.target),
-      saved: parseFloat(form.saved) || 0,
-      deadline: form.deadline ? new Date(form.deadline).toISOString() : undefined,
-      emoji: form.emoji || "🎯",
+      title: title.trim(),
+      target: parseFloat(target),
+      saved: parseFloat(saved) || 0,
+      deadline: deadline ? new Date(deadline).toISOString() : undefined,
+      emoji: emoji || "🎯",
     });
-    setForm({ title: "", target: "", saved: "", deadline: "", emoji: "🎯", currency });
+    resetForm();
     setShowForm(false);
   };
+
   const handleDeposit = (id: string) => {
     const amt = parseFloat(depositAmount);
     if (!isNaN(amt) && amt > 0) updateGoalSaved(id, amt);
@@ -43,7 +51,7 @@ export default function GoalsPage() {
           <p className="text-xs md:text-sm mt-1" style={{ color: "var(--muted)" }}>{goals.length} active goals</p>
         </div>
         <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-          onClick={() => { setShowForm(true); setError(""); }}
+          onClick={() => { resetForm(); setShowForm(true); }}
           className="bg-indigo-600 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm font-medium flex items-center gap-2">
           <Plus size={15} /> New
         </motion.button>
@@ -51,36 +59,51 @@ export default function GoalsPage() {
 
       <AnimatePresence>
         {showForm && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-            className="rounded-2xl p-4 mb-4 overflow-hidden"
-            style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <div className="rounded-2xl p-4 mb-4 overflow-hidden"
-            style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+          <motion.div
+            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+            className="rounded-2xl p-5 mb-5 overflow-hidden"
+            style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {[
-                { label: "Emoji", key: "emoji", type: "text", placeholder: "🎯" },
-                { label: "Goal Title *", key: "title", type: "text", placeholder: "e.g. Flight to Japan" },
-                { label: "Target Amount *", key: "target", type: "number", placeholder: "0.00" },
-                { label: "Already Saved", key: "saved", type: "number", placeholder: "0.00" },
-                { label: "Deadline (optional)", key: "deadline", type: "date", placeholder: "" },
-              ].map(({ label, key, type, placeholder }) => (
-                <div key={key}>
-                  <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>{label}</label>
-                  <input type={type} placeholder={placeholder}
-                    value={form[key as keyof typeof form]}
-                    onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
-                    style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
-                </div>
-              ))}
+              <div>
+                <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Emoji</label>
+                <input type="text" placeholder="🎯" value={emoji} onChange={(e) => setEmoji(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Goal Title *</label>
+                <input type="text" placeholder="e.g. Flight to Japan" value={title} onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Target Amount *</label>
+                <input type="number" placeholder="0.00" value={target} onChange={(e) => setTarget(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Already Saved</label>
+                <input type="number" placeholder="0.00" value={saved} onChange={(e) => setSaved(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Deadline (optional)</label>
+                <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }} />
+              </div>
             </div>
-            {error && <p className="text-xs mt-2" style={{ color: "#ef4444" }}>{error}</p>}
+            {error && <p className="text-xs mt-3" style={{ color: "#ef4444" }}>{error}</p>}
             <div className="flex gap-2 mt-4">
-              <button type="button" onClick={handleAdd} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Create</button>
-              <button type="button" onClick={() => { setShowForm(false); setError(""); }} className="flex-1 py-2.5 rounded-xl text-sm"
+              <button type="button" onClick={handleAdd}
+                className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium">Create Goal</button>
+              <button type="button" onClick={() => { setShowForm(false); resetForm(); }}
+                className="flex-1 py-2.5 rounded-xl text-sm"
                 style={{ background: "var(--background)", color: "var(--muted)", border: "1px solid var(--border)" }}>Cancel</button>
             </div>
-          </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -91,7 +114,6 @@ export default function GoalsPage() {
           const remaining = goal.target - goal.saved;
           const daysLeft = goal.deadline ? differenceInDays(parseISO(goal.deadline), new Date()) : null;
           const done = pct >= 100;
-
           return (
             <motion.div key={goal.id}
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
@@ -146,7 +168,7 @@ export default function GoalsPage() {
         })}
       </div>
 
-      {goals.length === 0 && (
+      {goals.length === 0 && !showForm && (
         <div className="text-center py-24" style={{ color: "var(--muted)" }}>
           <p className="text-4xl mb-3">🎯</p>
           <p className="text-sm">No savings goals yet.</p>
