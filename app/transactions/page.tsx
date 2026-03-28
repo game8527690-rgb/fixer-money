@@ -6,9 +6,11 @@ import { format, parseISO } from "date-fns";
 import { Trash2, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AddTransactionModal from "@/components/transactions/AddTransactionModal";
+import { t } from "@/lib/translations";
 
 export default function TransactionsPage() {
-  const { transactions, deleteTransaction, currency } = useFinanceStore();
+  const { transactions, deleteTransaction, currency, lang } = useFinanceStore();
+  const tr = t(lang);
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<TransactionType | "all">("all");
@@ -25,15 +27,15 @@ export default function TransactionsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "var(--foreground)" }}>Transactions</h1>
-          <p className="text-xs md:text-sm mt-1" style={{ color: "var(--muted)" }}>{filtered.length} transactions</p>
+          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "var(--foreground)" }}>{tr.transactionsTitle}</h1>
+          <p className="text-xs md:text-sm mt-1" style={{ color: "var(--muted)" }}>{filtered.length} {tr.transactions}</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
           onClick={() => setShowModal(true)}
           className="bg-indigo-600 text-white px-4 py-2 md:px-5 md:py-2.5 rounded-xl text-sm font-medium"
         >
-          + Add
+          + {tr.addTransaction}
         </motion.button>
       </div>
 
@@ -43,7 +45,7 @@ export default function TransactionsPage() {
           style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <Search size={15} style={{ color: "var(--muted)" }} />
           <input
-            placeholder="Search..."
+            placeholder={tr.searchTransactions}
             value={search} onChange={(e) => setSearch(e.target.value)}
             className="bg-transparent outline-none text-sm flex-1"
             style={{ color: "var(--foreground)" }}
@@ -52,15 +54,15 @@ export default function TransactionsPage() {
         <select value={filterType} onChange={(e) => setFilterType(e.target.value as TransactionType | "all")}
           className="px-3 py-2.5 rounded-xl text-sm outline-none"
           style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--foreground)" }}>
-          <option value="all">All Types</option>
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
-          <option value="transfer">Transfer</option>
+          <option value="all">{tr.allTypes}</option>
+          <option value="income">{tr.income}</option>
+          <option value="expense">{tr.expense}</option>
+          <option value="transfer">{tr.transfer}</option>
         </select>
         <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}
           className="px-3 py-2.5 rounded-xl text-sm outline-none"
           style={{ background: "var(--card)", border: "1px solid var(--border)", color: "var(--foreground)" }}>
-          <option value="all">All Categories</option>
+          <option value="all">{tr.allCategories}</option>
           {CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_ICONS[c]} {c}</option>)}
         </select>
       </div>
@@ -118,7 +120,7 @@ export default function TransactionsPage() {
                 <span className="text-lg">{CATEGORY_ICONS[t.category]}</span>
                 <div>
                   <p className="text-sm font-medium" style={{ color: "var(--foreground)" }}>{t.title}</p>
-                  {t.recurring && <span className="text-xs" style={{ color: "var(--muted)" }}>🔄 Recurring</span>}
+                  {tr.recurring && <span className="text-xs" style={{ color: "var(--muted)" }}>🔄 {tr.recurring}</span>}
                 </div>
               </div>
               <span className="text-sm" style={{ color: "var(--muted)" }}>{t.category}</span>

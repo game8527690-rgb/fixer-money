@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { Lang } from "@/lib/i18n";
 
 export type Category =
   | "Food" | "Transport" | "Rent" | "Entertainment"
@@ -66,6 +67,7 @@ interface FinanceState {
   debts: Debt[];
   darkMode: boolean;
   currency: string;
+  lang: Lang;
   addTransaction: (t: Omit<Transaction, "id">) => void;
   deleteTransaction: (id: string) => void;
   addBudget: (b: Omit<Budget, "id">) => void;
@@ -80,6 +82,7 @@ interface FinanceState {
   deleteDebt: (id: string) => void;
   toggleDarkMode: () => void;
   setCurrency: (c: string) => void;
+  setLang: (l: Lang) => void;
 }
 
 export const useFinanceStore = create<FinanceState>()((set) => ({
@@ -89,6 +92,7 @@ export const useFinanceStore = create<FinanceState>()((set) => ({
   debts: [],
   darkMode: false,
   currency: "USD",
+  lang: "en",
 
   addTransaction: (t) =>
     set((s) => ({ transactions: [{ ...t, id: crypto.randomUUID() }, ...s.transactions] })),
@@ -137,6 +141,7 @@ export const useFinanceStore = create<FinanceState>()((set) => ({
 
   toggleDarkMode: () => set((s) => ({ darkMode: !s.darkMode })),
   setCurrency: (currency) => set({ currency }),
+  setLang: (lang) => set({ lang }),
 }));
 
 export const CATEGORIES: Category[] = [

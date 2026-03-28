@@ -3,17 +3,17 @@ import { motion } from "framer-motion";
 import { Transaction, CATEGORY_ICONS } from "@/store/useFinanceStore";
 import { formatCurrency } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
+import { t } from "@/lib/translations";
+import type { Lang } from "@/lib/i18n";
 
-interface Props {
-  transactions: Transaction[];
-  currency: string;
-}
+interface Props { transactions: Transaction[]; currency: string; lang: Lang; }
 
-export default function RecentTransactions({ transactions, currency }: Props) {
+export default function RecentTransactions({ transactions, currency, lang }: Props) {
+  const tr = t(lang);
   const recent = transactions.slice(0, 6);
   return (
     <div className="rounded-2xl p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-      <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>Recent Transactions</h3>
+      <h3 className="font-semibold mb-4" style={{ color: "var(--foreground)" }}>{tr.recentTransactions}</h3>
       <div className="flex flex-col gap-3">
         {recent.map((t, i) => (
           <motion.div

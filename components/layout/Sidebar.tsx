@@ -3,23 +3,26 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, ArrowLeftRight, PieChart, Target, Moon, Sun, Wallet, BarChart2, Menu, X, LogOut, HandCoins, ChevronDown } from "lucide-react";
 import { useFinanceStore, CURRENCIES, CURRENCY_SYMBOLS } from "@/store/useFinanceStore";
+import { LANGUAGES } from "@/lib/i18n";
+import { t } from "@/lib/translations";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
 
-const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/transactions", label: "Transactions", icon: ArrowLeftRight },
-  { href: "/budgets", label: "Budgets", icon: PieChart },
-  { href: "/analytics", label: "Analytics", icon: BarChart2 },
-  { href: "/goals", label: "Goals", icon: Target },
-  { href: "/debts", label: "Debts", icon: HandCoins },
+const NAV = (tr: ReturnType<typeof t>) => [
+  { href: "/dashboard", label: tr.dashboard, icon: LayoutDashboard },
+  { href: "/transactions", label: tr.transactions, icon: ArrowLeftRight },
+  { href: "/budgets", label: tr.budgets, icon: PieChart },
+  { href: "/analytics", label: tr.analytics, icon: BarChart2 },
+  { href: "/goals", label: tr.goals, icon: Target },
+  { href: "/debts", label: tr.debts, icon: HandCoins },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { darkMode, toggleDarkMode, currency, setCurrency } = useFinanceStore();
+  const { darkMode, toggleDarkMode, currency, setCurrency, lang, setLang } = useFinanceStore();
+  const tr = t(lang);
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -33,7 +36,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex flex-col gap-1 flex-1">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {NAV(tr).map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
             <Link key={href} href={href} onClick={() => setMobileOpen(false)}>
@@ -52,12 +55,27 @@ export default function Sidebar() {
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-indigo-50"
           style={{ color: "var(--muted)" }}>
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          {darkMode ? "Light Mode" : "Dark Mode"}
+          {darkMode ? tr.lightMode : tr.darkMode}
         </button>
+
+        {/* Language selector */}
+        <div className="px-4 py-2">
+          <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>{tr.language}</label>
+          <div className="relative">
+            <select value={lang} onChange={(e) => setLang(e.target.value as typeof lang)}
+              className="w-full px-3 py-2 rounded-xl text-sm outline-none appearance-none pr-8"
+              style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--foreground)" }}>
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--muted)" }} />
+          </div>
+        </div>
 
         {/* Currency selector */}
         <div className="px-4 py-2">
-          <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>Currency</label>
+          <label className="text-xs font-medium mb-1 block" style={{ color: "var(--muted)" }}>{tr.currency}</label>
           <div className="relative">
             <select value={currency} onChange={(e) => setCurrency(e.target.value)}
               className="w-full px-3 py-2 rounded-xl text-sm outline-none appearance-none pr-8"
@@ -85,7 +103,7 @@ export default function Sidebar() {
             <button onClick={logout}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium w-full hover:bg-red-50 hover:text-red-500 transition-colors"
               style={{ color: "var(--muted)" }}>
-              <LogOut size={16} /> Sign Out
+              <LogOut size={16} /> {tr.signOut}
             </button>
           </div>
         )}

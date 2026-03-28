@@ -4,20 +4,27 @@ import { useRouter, usePathname } from "next/navigation";
 import { useFinanceStore } from "@/store/useFinanceStore";
 import { useAuth } from "@/context/AuthContext";
 import { useFirestoreSync } from "@/lib/useFirestoreData";
+import { LANGUAGES } from "@/lib/i18n";
 import Sidebar from "./Sidebar";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const darkMode = useFinanceStore((s) => s.darkMode);
+  const lang = useFinanceStore((s) => s.lang);
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Sync Firestore when user is logged in
   useFirestoreSync(user?.uid ?? "");
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
+
+  useEffect(() => {
+    const langDef = LANGUAGES.find((l) => l.code === lang);
+    document.documentElement.setAttribute("lang", lang);
+    document.documentElement.setAttribute("dir", langDef?.dir ?? "ltr");
+  }, [lang]);
 
   useEffect(() => {
     if (!loading) {
@@ -34,9 +41,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     );
   }
 
-  if (!user || pathname === "/login") {
-    return <>{children}</>;
-  }
+  if (!user || pathname === "/login") return <>{children}</>;
 
   return (
     <div className="flex min-h-screen">
