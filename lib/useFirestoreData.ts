@@ -6,11 +6,22 @@ import {
 import { db } from "@/lib/firebase";
 import { useFinanceStore, Transaction, Budget, SavingsGoal, Debt, DebtPayment } from "@/store/useFinanceStore";
 
-// Firestore does NOT accept undefined values — strip them before saving
+// Firestore does NOT accept undefined values — strip them recursively before saving
 function clean<T extends object>(obj: T): T {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, v]) => v !== undefined && v !== null)
-  ) as T;
+  const result: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === undefined || v === null) continue;
+    if (Array.isArray(v)) {
+      result[k] = v.map((item) =>
+        item && typeof item === "object" ? clean(item as object) : item
+      );
+    } else if (typeof v === "object") {
+      result[k] = clean(v as object);
+    } else {
+      result[k] = v;
+    }
+  }
+  return result as T;
 }
 
 export function useFirestoreSync(uid: string) {
